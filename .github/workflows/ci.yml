@@ -1,0 +1,27 @@
+name: MiniRedis CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build C++ binary
+        run: |
+          g++ -std=c++17 main.cpp store.cpp -pthread -o miniredis
+
+      - name: Build Docker image
+        run: |
+          docker build -t miniredis-test .
+
+      - name: Verify Docker image
+        run: |
+          docker image inspect miniredis-test
