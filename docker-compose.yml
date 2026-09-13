@@ -1,0 +1,10 @@
+
+services:
+  miniredis:
+    build: .
+    container_name: miniredis-server
+    ports:
+      - "6380:6380"
+    volumes:
+      - ./data:/data
+    restart: unless-stopped

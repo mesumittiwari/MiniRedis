@@ -1,0 +1,15 @@
+# Build output
+miniredis
+
+# Persistence/runtime data
+data/
+*.dump
+*.aof
+*.log
+
+# IDE / editor files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
