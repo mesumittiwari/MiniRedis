@@ -32,6 +32,7 @@ void Store::save_to_disk(const std::string& filename) {
         outfile << "\n";
     }
     
+    outfile.flush(); // Flushes OS write buffer before closing
     outfile.close();
     std::cout << "Database successfully saved to " << filename << "\n";
 }
@@ -77,7 +78,7 @@ void Store::load_from_disk(const std::string& filename) {
     std::cout << "Database successfully loaded from " << filename << "\n";
 }
 
-// Helper: Checks expiry and lazily deletes if needed
+// Private helper: assumes caller already holds rw_lock!
 bool Store::is_expired(const std::string& key) {
     auto it = data.find(key);
     if (it == data.end()) return false;
@@ -113,16 +114,18 @@ std::string Store::get(const std::string& key) {
 }
 
 bool Store::del(const std::string& key) {
-    // We don't need to check expiry to delete, just erase it
+    std::unique_lock<std::shared_mutex> lock(rw_lock);
     return data.erase(key) > 0;
 }
 
 bool Store::exists(const std::string& key) {
+    std::unique_lock<std::shared_mutex> lock(rw_lock);
     if (is_expired(key)) return false;
     return data.find(key) != data.end();
 }
 
 bool Store::expire(const std::string& key, int seconds) {
+    std::unique_lock<std::shared_mutex> lock(rw_lock);
     if (is_expired(key)) return false;
     
     auto it = data.find(key);
@@ -135,6 +138,7 @@ bool Store::expire(const std::string& key, int seconds) {
 }
 
 int Store::ttl(const std::string& key) {
+    std::unique_lock<std::shared_mutex> lock(rw_lock);
     if (is_expired(key)) return -2; // Redis standard: -2 means key does not exist
     
     auto it = data.find(key);

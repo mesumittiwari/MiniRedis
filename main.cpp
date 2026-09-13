@@ -9,6 +9,7 @@
 #include <thread> // Included for multithreading
 #include "store.h"
 #include <csignal>
+#include <cctype>
 
 // Global pointer for the signal handler to access the store on exit
 Store* global_store = nullptr;
